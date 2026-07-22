@@ -12,6 +12,10 @@
   .header .icon { font-size: 40px; margin-bottom: 6px; }
   .header h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
   .header p { font-size: 13px; opacity: 0.85; }
+  .sound-bar { display: flex; align-items: center; justify-content: center; gap: 10px; background: #F3F4F6; border-radius: 12px; padding: 10px 14px; margin-bottom: 14px; }
+  .sound-label { font-size: 13px; color: #6B7280; font-weight: 500; }
+  .sound-toggle { background: none; border: none; font-size: 22px; cursor: pointer; padding: 0 4px; }
+  .volume-slider { flex: 1; accent-color: #7C3AED; height: 6px; }
   .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
   .tab { flex: 1; padding: 10px 4px; border-radius: 12px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
   .tab.active { color: white; transform: scale(1.03); }
@@ -22,7 +26,7 @@
   .tab:not(.active):hover { background: #E5E7EB; }
   .card { background: #FAFAFA; border: 1px solid #E5E7EB; border-radius: 16px; padding: 16px; margin-bottom: 12px; }
   .emoji-row { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; min-height: 50px; align-items: center; margin: 10px 0; }
-  .emoji { font-size: 28px; transition: transform 0.2s; user-select: none; }
+  .emoji { font-size: 28px; user-select: none; }
   .question { font-size: 28px; font-weight: 700; color: #1F2937; text-align: center; margin: 12px 0; }
   .answer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
   .ans-btn { padding: 16px; border-radius: 14px; border: 2px solid #E5E7EB; background: white; font-size: 24px; font-weight: 700; cursor: pointer; transition: all 0.15s; color: #1F2937; }
@@ -47,9 +51,7 @@
   .add-sides { display: flex; gap: 8px; justify-content: center; align-items: center; margin: 8px 0; }
   .add-side { flex: 1; background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 8px; min-height: 60px; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; justify-content: center; }
   .plus-sign { font-size: 28px; color: #10B981; font-weight: 700; }
-  .sub-emoji-row { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; min-height: 50px; align-items: center; margin: 10px 0; }
-  .celebration { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; }
-  .confetti { position: absolute; width: 10px; height: 10px; border-radius: 2px; animation: fall 1s ease-in forwards; }
+  .confetti { position: fixed; width: 10px; height: 10px; border-radius: 2px; pointer-events: none; z-index: 999; animation: fall 1.2s ease-in forwards; }
   @keyframes fall { to { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
   .tab-content { display: none; }
   .tab-content.active { display: block; }
@@ -58,10 +60,19 @@
 </head>
 <body>
 <div class="app">
+
   <div class="header">
     <div class="icon">🌟</div>
     <h1>Math Stars!</h1>
     <p>For PreK, Kinder &amp; 1st Grade</p>
+  </div>
+
+  <!-- SOUND CONTROLS -->
+  <div class="sound-bar">
+    <button class="sound-toggle" id="sound-toggle" onclick="toggleSound()" title="Toggle sound">🔊</button>
+    <span class="sound-label">Volume</span>
+    <input type="range" class="volume-slider" id="volume-slider" min="0" max="1" step="0.05" value="0.7" oninput="setVolume(this.value)">
+    <span id="volume-pct" style="font-size:12px;color:#6B7280;min-width:30px">70%</span>
   </div>
 
   <div class="tabs">
@@ -125,7 +136,7 @@
       </div>
       <div class="progress"><div class="progress-bar" id="sub-bar" style="width:0%"></div></div>
       <div class="section-title">How many are left? 🤔</div>
-      <div class="sub-emoji-row" id="sub-emojis"></div>
+      <div class="emoji-row" id="sub-emojis"></div>
       <div class="question" id="sub-question"></div>
       <div class="answer-grid" id="sub-answers"></div>
       <div class="feedback" id="sub-feedback"></div>
@@ -145,7 +156,60 @@ let scores = {count:0, add:0, sub:0};
 let correct = {count:null, add:null, sub:null};
 let answered = {count:false, add:false, sub:false};
 let counterVal = 5;
-let counterEmoji = '🌟';
+let soundOn = true;
+let masterVolume = 0.7;
+
+const ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playTone(freq, type, duration, vol, delay=0){
+  if(!soundOn) return;
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  o.connect(g); g.connect(ctx.destination);
+  o.type = type;
+  o.frequency.setValueAtTime(freq, ctx.currentTime + delay);
+  g.gain.setValueAtTime(masterVolume * vol, ctx.currentTime + delay);
+  g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + duration);
+  o.start(ctx.currentTime + delay);
+  o.stop(ctx.currentTime + delay + duration);
+}
+
+function playCorrect(){
+  playTone(523, 'sine', 0.15, 0.4);
+  playTone(659, 'sine', 0.15, 0.4, 0.15);
+  playTone(784, 'sine', 0.25, 0.5, 0.30);
+  playTone(1047,'sine', 0.35, 0.5, 0.50);
+}
+
+function playWrong(){
+  playTone(300, 'sawtooth', 0.1, 0.3);
+  playTone(250, 'sawtooth', 0.2, 0.3, 0.12);
+}
+
+function playClick(){
+  playTone(440, 'sine', 0.08, 0.2);
+}
+
+function playStar(){
+  [523,587,659,698,784].forEach((f,i)=> playTone(f,'sine',0.12,0.35,i*0.08));
+}
+
+function playNext(){
+  playTone(392,'sine',0.1,0.2);
+  playTone(523,'sine',0.1,0.2,0.1);
+}
+
+function toggleSound(){
+  soundOn = !soundOn;
+  document.getElementById('sound-toggle').textContent = soundOn ? '🔊' : '🔇';
+  if(soundOn) playClick();
+}
+
+function setVolume(v){
+  masterVolume = parseFloat(v);
+  document.getElementById('volume-pct').textContent = Math.round(v*100)+'%';
+  if(soundOn) playClick();
+}
 
 function rand(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
@@ -156,15 +220,27 @@ function showTab(tab){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById(tab+'-tab').classList.add('active');
   document.querySelectorAll('.tab')[['count','add','sub'].indexOf(tab)].classList.add('active');
+  playClick();
   if(tab==='count' && correct.count===null) newCountQ();
   if(tab==='add' && correct.add===null) newAddQ();
   if(tab==='sub' && correct.sub===null) newSubQ();
 }
 
+function getOptions(ans, max){
+  let opts = new Set([ans]);
+  let tries = 0;
+  while(opts.size < 4 && tries < 50){
+    let v = ans + rand(-3,3);
+    if(v>=0 && v<=max) opts.add(v);
+    tries++;
+  }
+  return [...opts];
+}
+
 function makeAnswerBtns(options, correctAns, prefix){
   const grid = document.getElementById(prefix+'-answers');
   grid.innerHTML='';
-  shuffle(options).forEach(a=>{
+  shuffle(options).slice(0,4).forEach(a=>{
     const btn = document.createElement('button');
     btn.className='ans-btn';
     btn.textContent=a;
@@ -173,17 +249,9 @@ function makeAnswerBtns(options, correctAns, prefix){
   });
 }
 
-function getOptions(ans, max){
-  let opts = new Set([ans]);
-  while(opts.size < 4){
-    let v = ans + rand(-3,3);
-    if(v>=0 && v<=max && v!==ans) opts.add(v);
-  }
-  return [...opts];
-}
-
 function checkAnswer(chosen, correctAns, prefix){
   if(answered[prefix]) return;
+  if(ctx.state === 'suspended') ctx.resume();
   answered[prefix] = true;
   const btns = document.querySelectorAll('#'+prefix+'-answers .ans-btn');
   btns.forEach(b=>{
@@ -196,30 +264,36 @@ function checkAnswer(chosen, correctAns, prefix){
     scores[prefix]++;
     document.getElementById(prefix+'-score').textContent=scores[prefix];
     document.getElementById(prefix+'-bar').style.width=Math.min(scores[prefix]*10,100)+'%';
-    document.getElementById(prefix+'-stars').textContent='⭐'.repeat(Math.min(scores[prefix],5));
+    const starCount = Math.min(scores[prefix],5);
+    document.getElementById(prefix+'-stars').textContent='⭐'.repeat(starCount);
     fb.textContent=pick(praise);
     fb.className='feedback good';
+    playCorrect();
+    if(scores[prefix]%5===0) playStar();
     celebrate();
   } else {
     fb.textContent=pick(encourage);
     fb.className='feedback bad';
+    playWrong();
   }
 }
 
 function celebrate(){
-  const colors=['#FF6B6B','#4ECDC4','#45B7D1','#96CEB4','#FFEAA7','#DDA0DD','#98D8C8'];
-  for(let i=0;i<20;i++){
+  const colors=['#FF6B6B','#4ECDC4','#45B7D1','#96CEB4','#FFEAA7','#DDA0DD','#7C3AED','#F59E0B'];
+  for(let i=0;i<25;i++){
     setTimeout(()=>{
       const c=document.createElement('div');
       c.className='confetti';
-      c.style.cssText=`left:${Math.random()*100}%;top:-20px;background:${pick(colors)};transform:rotate(${rand(0,360)}deg);animation-duration:${0.8+Math.random()*0.6}s;animation-delay:${Math.random()*0.3}s;`;
+      c.style.cssText=`left:${Math.random()*100}%;top:-20px;background:${pick(colors)};border-radius:${Math.random()>0.5?'50%':'2px'};animation-duration:${0.9+Math.random()*0.7}s;animation-delay:${Math.random()*0.2}s;`;
       document.body.appendChild(c);
-      setTimeout(()=>c.remove(),1500);
-    },i*30);
+      setTimeout(()=>c.remove(),1800);
+    },i*25);
   }
 }
 
 function newCountQ(){
+  if(ctx.state==='suspended') ctx.resume();
+  playNext();
   answered.count=false;
   document.getElementById('count-feedback').textContent='';
   const n=rand(1,10);
@@ -230,18 +304,22 @@ function newCountQ(){
 }
 
 function newAddQ(){
+  if(ctx.state==='suspended') ctx.resume();
+  playNext();
   answered.add=false;
   document.getElementById('add-feedback').textContent='';
   const a=rand(0,5), b=rand(0,5);
   correct.add=a+b;
   const em1=pick(emojis), em2=pick(emojis);
-  document.getElementById('add-side1').innerHTML=a===0?'<span style="font-size:20px;color:#9CA3AF">0️⃣</span>':Array(a).fill('<span style="font-size:22px">'+em1+'</span>').join('');
-  document.getElementById('add-side2').innerHTML=b===0?'<span style="font-size:20px;color:#9CA3AF">0️⃣</span>':Array(b).fill('<span style="font-size:22px">'+em2+'</span>').join('');
+  document.getElementById('add-side1').innerHTML=a===0?'<span style="font-size:20px">0️⃣</span>':Array(a).fill('<span style="font-size:22px">'+em1+'</span>').join('');
+  document.getElementById('add-side2').innerHTML=b===0?'<span style="font-size:20px">0️⃣</span>':Array(b).fill('<span style="font-size:22px">'+em2+'</span>').join('');
   document.getElementById('add-question').textContent=a+' + '+b+' = ?';
   makeAnswerBtns(getOptions(a+b,10), a+b, 'add');
 }
 
 function newSubQ(){
+  if(ctx.state==='suspended') ctx.resume();
+  playNext();
   answered.sub=false;
   document.getElementById('sub-feedback').textContent='';
   const a=rand(1,10), b=rand(0,a);
@@ -252,13 +330,27 @@ function newSubQ(){
   makeAnswerBtns(getOptions(a-b,10), a-b, 'sub');
 }
 
-function countUp(){if(counterVal<20)counterVal++;updateCounter();}
-function countDown(){if(counterVal>0)counterVal--;updateCounter();}
-function updateCounter(){
-  counterEmoji=pick(emojis);
-  document.getElementById('counter-num').textContent=counterVal;
-  document.getElementById('counter-emojis').innerHTML=counterVal===0?'<span style="font-size:16px;color:#9CA3AF">Zero! Nothing here 😊</span>':Array(Math.min(counterVal,20)).fill('<span class="emoji" style="font-size:22px">'+counterEmoji+'</span>').join('');
+function countUp(){
+  if(ctx.state==='suspended') ctx.resume();
+  if(counterVal<20) counterVal++;
+  playTone(300+counterVal*20,'sine',0.1,0.25);
+  updateCounter();
 }
+function countDown(){
+  if(ctx.state==='suspended') ctx.resume();
+  if(counterVal>0) counterVal--;
+  playTone(500-counterVal*15,'sine',0.1,0.25);
+  updateCounter();
+}
+function updateCounter(){
+  const em=pick(emojis);
+  document.getElementById('counter-num').textContent=counterVal;
+  document.getElementById('counter-emojis').innerHTML=counterVal===0
+    ?'<span style="font-size:16px;color:#9CA3AF">Zero! Nothing here 😊</span>'
+    :Array(Math.min(counterVal,20)).fill('<span class="emoji" style="font-size:22px">'+em+'</span>').join('');
+}
+
+document.addEventListener('click', ()=>{ if(ctx.state==='suspended') ctx.resume(); }, {once:true});
 
 newCountQ();
 updateCounter();
