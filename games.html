@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Little Learners 🌈 - Fun Games!</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #f093fb 0%, #f5576c 50%, #4facfe 100%); min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; padding: 20px; }
+  .app { background: white; border-radius: 24px; padding: 20px; max-width: 440px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+  .header { text-align: center; padding: 16px; background: linear-gradient(135deg, #f093fb, #f5576c); border-radius: 16px; margin-bottom: 14px; color: white; }
+  .header .icon { font-size: 40px; margin-bottom: 4px; }
+  .header h1 { font-size: 22px; font-weight: 700; margin-bottom: 2px; }
+  .header p { font-size: 12px; opacity: 0.9; }
+  .sound-bar { display: flex; align-items: center; gap: 10px; background: #F3F4F6; border-radius: 12px; padding: 8px 14px; margin-bottom: 12px; }
+  .sound-toggle { background: none; border: none; font-size: 22px; cursor: pointer; }
+  .volume-slider { flex: 1; accent-color: #f5576c; }
+  .sound-label { font-size: 12px; color: #6B7280; }
+  .vol-pct { font-size: 12px; color: #6B7280; min-width: 32px; }
+  .tabs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 14px; }
+  .tab { padding: 8px 4px; border-radius: 12px; border: none; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s; background: #F3F4F6; color: #6B7280; }
+  .tab.active { color: white; transform: scale(1.04); }
+  .tab:nth-child(1).active { background: #F59E0B; }
+  .tab:nth-child(2).active { background: #10B981; }
+  .tab:nth-child(3).active { background: #3B82F6; }
+  .tab:nth-child(4).active { background: #EF4444; }
+  .tab:nth-child(5).active { background: #8B5CF6; }
+  .tab:nth-child(6).active { background: #EC4899; }
+  .tab:not(.active):hover { background: #E5E7EB; }
+  .card { background: #FAFAFA; border: 1px solid #E5E7EB; border-radius: 16px; padding: 16px; margin-bottom: 10px; }
+  .section-title { font-size: 14px; font-weight: 600; color: #6B7280; margin-bottom: 10px; }
+  .score-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .score { font-size: 13px; color: #6B7280; font-weight: 500; }
+  .progress { height: 8px; background: #E5E7EB; border-radius: 4px; overflow: hidden; margin-bottom: 12px; }
+  .progress-bar { height: 100%; border-radius: 4px; transition: width 0.4s; }
+  .feedback { text-align: center; font-size: 17px; font-weight: 700; min-height: 26px; margin: 6px 0; }
+  .feedback.good { color: #10B981; }
+  .feedback.bad { color: #EF4444; }
+  .next-btn { width: 100%; padding: 13px; border-radius: 14px; border: none; color: white; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 8px; transition: all 0.2s; }
+  .next-btn:hover { transform: scale(1.02); opacity: 0.92; }
+  /* COLORS */
+  .color-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin: 10px 0; }
+  .color-swatch { height: 70px; border-radius: 14px; cursor: pointer; border: 3px solid transparent; transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.4); }
+  .color-swatch:hover { transform: scale(1.07); }
+  .color-swatch.correct { border-color: #10B981; box-shadow: 0 0 0 4px #D1FAE5; }
+  .color-swatch.wrong { border-color: #EF4444; box-shadow: 0 0 0 4px #FEE2E2; opacity: 0.6; }
+  .color-question { font-size: 22px; font-weight: 700; text-align: center; margin: 10px 0; color: #1F2937; }
+  /* SHAPES */
+  .shape-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin: 10px 0; }
+  .shape-btn { padding: 16px 10px; border-radius: 14px; border: 2px solid #E5E7EB; background: white; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #374151; }
+  .shape-btn:hover { border-color: #3B82F6; background: #EFF6FF; }
+  .shape-btn.correct { background: #D1FAE5; border-color: #10B981; }
+  .shape-btn.wrong { background: #FEE2E2; border-color: #EF4444; opacity: 0.7; }
+  .shape-svg { width: 50px; height: 50px; }
+  /* LETTERS */
+  .letter-display { font-size: 80px; font-weight: 900; text-align: center; margin: 10px 0; line-height: 1; }
+  .letter-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+  .letter-btn { padding: 14px; border-radius: 14px; border: 2px solid #E5E7EB; background: white; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.15s; color: #1F2937; text-align: left; display: flex; align-items: center; gap: 8px; }
+  .letter-btn .letter-emoji { font-size: 20px; }
+  .letter-btn:hover { border-color: #8B5CF6; background: #F5F3FF; }
+  .letter-btn.correct { background: #D1FAE5; border-color: #10B981; }
+  .letter-btn.wrong { background: #FEE2E2; border-color: #EF4444; opacity: 0.7; }
+  /* ANIMALS */
+  .animal-display { font-size: 72px; text-align: center; margin: 10px 0; }
+  .animal-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+  .animal-btn { padding: 12px; border-radius: 14px; border: 2px solid #E5E7EB; background: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; color: #1F2937; display: flex; align-items: center; gap: 8px; }
+  .animal-btn:hover { border-color: #EF4444; background: #FFF5F5; }
+  .animal-btn .a-emoji { font-size: 22px; }
+  .animal-btn.correct { background: #D1FAE5; border-color: #10B981; }
+  .animal-btn.wrong { background: #FEE2E2; border-color: #EF4444; opacity: 0.7; }
+  /* PATTERNS */
+  .pattern-row { display: flex; align-items: center; gap: 8px; justify-content: center; margin: 14px 0; flex-wrap: wrap; }
+  .pattern-item { font-size: 32px; }
+  .pattern-blank { width: 44px; height: 44px; border: 3px dashed #9CA3AF; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #9CA3AF; }
+  .pattern-options { display: flex; gap: 10px; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
+  .pattern-opt { font-size: 36px; cursor: pointer; padding: 8px; border-radius: 12px; border: 2px solid #E5E7EB; background: white; transition: all 0.15s; }
+  .pattern-opt:hover { border-color: #EC4899; background: #FDF2F8; transform: scale(1.1); }
+  .pattern-opt.correct { border-color: #10B981; background: #D1FAE5; }
+  .pattern-opt.wrong { border-color: #EF4444; background: #FEE2E2; opacity: 0.6; }
+  /* BIGGER SMALLER */
+  .compare-row { display: flex; align-items: center; justify-content: center; gap: 16px; margin: 14px 0; }
+  .compare-box { background: white; border: 2px solid #E5E7EB; border-radius: 14px; padding: 14px; text-align: center; flex: 1; cursor: pointer; transition: all 0.2s; }
+  .compare-box:hover { border-color: #3B82F6; transform: scale(1.04); }
+  .compare-box .num { font-size: 42px; font-weight: 900; color: #1F2937; }
+  .compare-box .emojis { font-size: 16px; min-height: 24px; }
+  .compare-box.correct { background: #D1FAE5; border-color: #10B981; }
+  .compare-box.wrong { background: #FEE2E2; border-color: #EF4444; opacity: 0.7; }
+  .compare-question { font-size: 16px; font-weight: 600; color: #6B7280; text-align: center; margin-bottom: 8px; }
+  .confetti { position: fixed; width: 10px; height: 10px; pointer-events: none; z-index: 999; animation: fall 1.2s ease-in forwards; }
+  @keyframes fall { to { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  footer { text-align: center; font-size: 11px; color: #9CA3AF; margin-top: 8px; padding-top: 8px; border-top: 1px solid #E5E7EB; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <div class="icon">🌈</div>
+    <h1>Little Learners!</h1>
+    <p>Colors · Shapes · Letters · Animals · Patterns · Compare</p>
+  </div>
+
+  <div class="sound-bar">
+    <button class="sound-toggle" id="snd-btn" onclick="toggleSound()">🔊</button>
+    <span class="sound-label">Volume</span>
+    <input type="range" class="volume-slider" min="0" max="1" step="0.05" value="0.7" oninput="setVol(this.value)">
+    <span class="vol-pct" id="vol-pct">70%</span>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('colors')">🎨 Colors</button>
+    <button class="tab" onclick="showTab('shapes')">🔷 Shapes</button>
+    <button class="tab" onclick="showTab('letters')">🔤 Letters</button>
+    <button class="tab" onclick="showTab('animals')">🐾 Animals</button>
+    <button class="tab" onclick="showTab('patterns')">🔁 Patterns</button>
+    <button class="tab" onclick="showTab('compare')">⚖️ Compare</button>
+  </div>
+
+  <!-- COLORS TAB -->
+  <div id="colors-tab" class="tab-content active">
+    <div class="card">
+      <div class="score-row">
+        <span class="score">⭐ Stars: <span id="colors-score">0</span></span>
+        <span id="colors-stars"></span>
+      </div>
+      <div class="progress"><div class="progress-bar" id="colors-bar" style="width:0%;background:#F59E0B"></div></div>
+      <div class="section-title">Which color is this? 🎨</div>
+      <div class="color-question" id="color-question"></div>
+      <div class="color-grid" id="color-grid"></div>
+      <div class="feedback" id="colors-feedback"></div>
+      <button class="next-btn" style="background:linear-gradient(135deg,#F59E0B,#D97706)" onclick="newColorQ()">Next ➡️</button>
+    </div>
+  </div>
+
+  <!-- SHAPES TAB -->
+  <div id="shapes-tab" class="tab-content">
+    <div class="card">
+      <div class="score-row">
+        <span class="score">⭐ Stars: <span id="shapes-score">0</span></span>
+        <span id="shapes-stars"></span>
+      </div>
+      <div class="progress"><div class="progress-bar" id="shapes-bar" style="width:0%;background:#10B981"></div></div>
+      <div class="section-title">What shape is this? 🔷</div>
+      <div style="text-align:center;margin:10px 0" id="shape-display"></div>
+      <div class="shape-grid" id="shape-grid"></div>
+      <div class="feedback" id="shapes-feedback"></div>
+      <button class="next-btn" style="background:linear-gradient(135deg,#10B981,#059669)" onclick="newShapeQ()">Next ➡️</button>
+    </div>
+  </div>
+
+  <!-- LETTERS TAB -->
+  <div id="letters-tab" class="tab-content">
+    <div class="card">
+      <div class="score-row">
+        <span class="score">⭐ Stars: <span id="letters-score">0</span></span>
+        <span id="letters-stars"></span>
+      </div>
+      <div class="progress"><div class="progress-bar" id="letters-bar" style="width:0%;background:#8B5CF6"></div></div>
+      <div class="section-title">What starts with this letter? 🔤</div>
+      <div class="letter-display" id="letter-display"></div>
+      <div class="letter-options" id="letter-options"></div>
+      <div class="feedback" id="letters-feedback"></div>
+      <button class="next-btn" style="background:linear-gradient(135deg,#8B5CF6,#7C3AED)" onclick="newLetterQ()">Next ➡️</button>
+    </div>
+  </div>
+
+  <!-- ANIMALS TAB -->
+  <div id="animals-tab" class="tab-content">
+    <div class="card">
+      <div class="score-row">
+        <span class="score">⭐ Stars: <span id="animals-score">0</span></span>
+        <span id="animals-stars"></span>
+      </div>
+      <div class="progress"><div class="progress-bar" id="animals-bar" style="width:0%;background:#EF4444"></div></div>
+      <div class="section-title">What animal is this? 🐾</div>
+      <div class="animal-display" id="animal-display"></div>
+      <div class="animal-options" id="animal-options"></div>
+      <div class="feedback" id="animals-feedback"></div>
+      <button class="next-btn" style="background:linear-gradient(135deg,#EF4444,#DC2626)" onclick="newAnimalQ()">Next ➡️</button>
+    </div>
+  </div>
+
+  <!-- PATTERNS TAB -->
+  <div id="patterns-tab" class="tab-content">
+    <div class="card">
+      <div class="score-row">
+        <span class="score">⭐ Stars: <span id="patterns-score">0</span></span>
+        <span id="patterns-stars"></span>
+      </div>
+      <div class="progress"><div class="progress-bar" id="patterns-bar" style="width:0%;background:#EC4899"></div></div>
+      <div class="section-title">What comes next? 🔁</div>
+      <div class="pattern-row" id="pattern-row"></div>
+      <div class="pattern-options" id="pattern-options"></div>
+      <div class="feedback" id="patterns-feedback"></div>
+      <button class="next-btn" style="background:linear-gradient(135deg,#EC4899,#DB2777)" onclick="newPatternQ()">Next ➡️</button>
+    </div>
+  </div>
+
+  <!-- COMPARE TAB -->
+  <div id="compare-tab" class="tab-content">
+    <div class="card">
+      <div class="score-row">
+        <span class="score">⭐ Stars: <span id="compare-score">0</span></span>
+        <span id="compare-stars"></span>
+      </div>
+      <div class="progress"><div class="progress-bar" id="compare-bar" style="width:0%;background:#3B82F6"></div></div>
+      <div class="compare-question" id="compare-question"></div>
+      <div class="compare-row" id="compare-row"></div>
+      <div class="feedback" id="compare-feedback"></div>
+      <button class="next-btn" style="background:linear-gradient(135deg,#3B82F6,#2563EB)" onclick="newCompareQ()">Next ➡️</button>
+    </div>
+  </div>
+
+  <footer>Made with ❤️ for little learners · Little Learners App</footer>
+</div>
+
+<script>
+// SOUND
+const ctx = new (window.AudioContext || window.webkitAudioContext)();
+let soundOn = true, masterVol = 0.7;
+
+function playTone(freq,type,dur,vol,delay=0){
+  if(!soundOn) return;
+  const o=ctx.createOscillator(), g=ctx.createGain();
+  o.connect(g); g.connect(ctx.destination);
+  o.type=type; o.frequency.setValueAtTime(freq,ctx.currentTime+delay);
+  g.gain.setValueAtTime(masterVol*vol,ctx.currentTime+delay);
+  g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+delay+dur);
+  o.start(ctx.currentTime+delay); o.stop(ctx.currentTime+delay+dur);
+}
+function playCorrect(){ playTone(523,'sine',0.12,0.4); playTone(659,'sine',0.12,0.4,0.13); playTone(784,'sine',0.12,0.4,0.26); playTone(1047,'sine',0.3,0.5,0.40); }
+function playWrong(){ playTone(300,'sawtooth',0.1,0.3); playTone(240,'sawtooth',0.2,0.3,0.12); }
+function playClick(){ playTone(440,'sine',0.07,0.2); }
+function playNext(){ playTone(392,'sine',0.08,0.2); playTone(523,'sine',0.08,0.2,0.1); }
+function toggleSound(){ soundOn=!soundOn; document.getElementById('snd-btn').textContent=soundOn?'🔊':'🔇'; if(soundOn) playClick(); }
+function setVol(v){ masterVol=parseFloat(v); document.getElementById('vol-pct').textContent=Math.round(v*100)+'%'; if(soundOn) playClick(); }
+document.addEventListener('click',()=>{if(ctx.state==='suspended')ctx.resume();},{once:true});
+
+// HELPERS
+const praise=['Amazing! 🎉','Super job! 🌟','You got it! 🏆','Awesome! 🎊','Brilliant! ✨','Wow! 🌈','Perfect! 💫','Great work! 🦄','You rock! 🎸'];
+const encourage=['Try again! 💪','Almost! 🤔','You can do it! 🌟','Keep going! 💛','So close! 🎯'];
+let scores={colors:0,shapes:0,letters:0,animals:0,patterns:0,compare:0};
+let answered={colors:false,shapes:false,letters:false,animals:false,patterns:false,compare:false};
+
+function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function shuffle(arr){let a=[...arr];for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function showTab(tab){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(tab+'-tab').classList.add('active');
+  const tabs=['colors','shapes','letters','animals','patterns','compare'];
+  document.querySelectorAll('.tab')[tabs.indexOf(tab)].classList.add('active');
+  playClick();
+  const inits={colors:newColorQ,shapes:newShapeQ,letters:newLetterQ,animals:newAnimalQ,patterns:newPatternQ,compare:newCompareQ};
+  inits[tab]();
+}
+
+function addScore(prefix){
+  scores[prefix]++;
+  document.getElementById(prefix+'-score').textContent=scores[prefix];
+  document.getElementById(prefix+'-bar').style.width=Math.min(scores[prefix]*10,100)+'%';
+  document.getElementById(prefix+'-stars').textContent='⭐'.repeat(Math.min(scores[prefix],5));
+}
+
+function setFeedback(prefix,correct){
+  const fb=document.getElementById(prefix+'-feedback');
+  fb.textContent=correct?pick(praise):pick(encourage);
+  fb.className='feedback '+(correct?'good':'bad');
+  if(correct){playCorrect();celebrate();}else{playWrong();}
+}
+
+function celebrate(){
+  const cols=['#FF6B6B','#4ECDC4','#45B7D1','#FFEAA7','#DDA0DD','#f093fb','#F59E0B','#10B981'];
+  for(let i=0;i<22;i++){
+    setTimeout(()=>{
+      const c=document.createElement('div');
+      c.className='confetti';
+      c.style.cssText=`left:${Math.random()*100}%;top:-20px;background:${pick(cols)};border-radius:${Math.random()>.5?'50%':'2px'};animation-duration:${0.9+Math.random()*0.6}s;animation-delay:${Math.random()*0.2}s;`;
+      document.body.appendChild(c);
+      setTimeout(()=>c.remove(),1800);
+    },i*25);
+  }
+}
+
+// ============ COLORS ============
+const colorData=[
+  {name:'Red',hex:'#EF4444'},{name:'Blue',hex:'#3B82F6'},{name:'Green',hex:'#22C55E'},
+  {name:'Yellow',hex:'#EAB308'},{name:'Orange',hex:'#F97316'},{name:'Purple',hex:'#A855F7'},
+  {name:'Pink',hex:'#EC4899'},{name:'Brown',hex:'#92400E'},{name:'Black',hex:'#111827'},
+  {name:'White',hex:'#E5E7EB'}
+];
+let colorAnswer='';
+
+function newColorQ(){
+  if(ctx.state==='suspended')ctx.resume();
+  playNext();
+  answered.colors=false;
+  document.getElementById('colors-feedback').textContent='';
+  const shuffled=shuffle(colorData).slice(0,6);
+  const correct=pick(shuffled);
+  colorAnswer=correct.name;
+  document.getElementById('color-question').textContent='Find the color: '+correct.name+'!';
+  const grid=document.getElementById('color-grid');
+  grid.innerHTML='';
+  shuffled.forEach(c=>{
+    const d=document.createElement('div');
+    d.className='color-swatch';
+    d.style.background=c.hex;
+    d.style.border=c.name==='White'?'2px solid #E5E7EB':'3px solid transparent';
+    d.style.color=c.name==='Yellow'||c.name==='White'?'#374151':'white';
+    d.textContent=c.name;
+    d.onclick=()=>checkColor(c.name,d);
+    grid.appendChild(d);
+  });
+}
+
+function checkColor(chosen,el){
+  if(answered.colors)return;
+  if(ctx.state==='suspended')ctx.resume();
+  answered.colors=true;
+  document.querySelectorAll('.color-swatch').forEach(s=>{
+    s.style.pointerEvents='none';
+    if(s.textContent===colorAnswer) s.className='color-swatch correct';
+    else if(s===el) s.className='color-swatch wrong';
+  });
+  const ok=chosen===colorAnswer;
+  if(ok)addScore('colors');
+  setFeedback('colors',ok);
+}
+
+// ============ SHAPES ============
+const shapeData=[
+  {name:'Circle',svg:'<circle cx="40" cy="40" r="35" fill="#3B82F6"/>'},
+  {name:'Square',svg:'<rect x="5" y="5" width="70" height="70" rx="4" fill="#10B981"/>'},
+  {name:'Triangle',svg:'<polygon points="40,5 75,75 5,75" fill="#F59E0B"/>'},
+  {name:'Rectangle',svg:'<rect x="2" y="18" width="76" height="44" rx="4" fill="#EF4444"/>'},
+  {name:'Star',svg:'<polygon points="40,5 48,30 75,30 53,47 61,72 40,55 19,72 27,47 5,30 32,30" fill="#A855F7"/>'},
+  {name:'Heart',svg:'<path d="M40 70 C10 50 5 25 20 15 C28 10 36 14 40 20 C44 14 52 10 60 15 C75 25 70 50 40 70Z" fill="#EC4899"/>'},
+  {name:'Diamond',svg:'<polygon points="40,5 75,40 40,75 5,40" fill="#14B8A6"/>'},
+  {name:'Oval',svg:'<ellipse cx="40" cy="40" rx="38" ry="25" fill="#F97316"/>'}
+];
+let shapeAnswer='';
+
+function newShapeQ(){
+  if(ctx.state==='suspended')ctx.resume();
+  playNext();
+  answered.shapes=false;
+  document.getElementById('shapes-feedback').textContent='';
+  const shuffled=shuffle(shapeData).slice(0,4);
+  const correct=pick(shuffled);
+  shapeAnswer=correct.name;
+  document.getElementById('shape-display').innerHTML=`<svg class="shape-svg" viewBox="0 0 80 80" style="width:100px;height:100px">${correct.svg}</svg>`;
+  const grid=document.getElementById('shape-grid');
+  grid.innerHTML='';
+  shuffled.forEach(s=>{
+    const b=document.createElement('button');
+    b.className='shape-btn';
+    b.innerHTML=`<svg class="shape-svg" viewBox="0 0 80 80">${s.svg}</svg>${s.name}`;
+    b.onclick=()=>checkShape(s.name,b);
+    grid.appendChild(b);
+  });
+}
+
+function checkShape(chosen,el){
+  if(answered.shapes)return;
+  if(ctx.state==='suspended')ctx.resume();
+  answered.shapes=true;
+  document.querySelectorAll('.shape-btn').forEach(b=>{
+    b.style.pointerEvents='none';
+    if(b.textContent===shapeAnswer) b.className='shape-btn correct';
+    else if(b===el) b.className='shape-btn wrong';
+  });
+  const ok=chosen===shapeAnswer;
+  if(ok)addScore('shapes');
+  setFeedback('shapes',ok);
+}
+
+// ============ LETTERS ============
+const letterData={
+  A:[{emoji:'🍎',word:'Apple'},{emoji:'✈️',word:'Airplane'},{emoji:'🐜',word:'Ant'}],
+  B:[{emoji:'🐝',word:'Bee'},{emoji:'🎈',word:'Balloon'},{emoji:'🍌',word:'Banana'}],
+  C:[{emoji:'🐱',word:'Cat'},{emoji:'🍰',word:'Cake'},{emoji:'🚗',word:'Car'}],
+  D:[{emoji:'🐶',word:'Dog'},{emoji:'🦆',word:'Duck'},{emoji:'💎',word:'Diamond'}],
+  E:[{emoji:'🐘',word:'Elephant'},{emoji:'🥚',word:'Egg'},{emoji:'👁️',word:'Eye'}],
+  F:[{emoji:'🐸',word:'Frog'},{emoji:'🌺',word:'Flower'},{emoji:'🐟',word:'Fish'}],
+  G:[{emoji:'🦒',word:'Giraffe'},{emoji:'🍇',word:'Grapes'},{emoji:'🎸',word:'Guitar'}],
+  H:[{emoji:'🏠',word:'House'},{emoji:'🐴',word:'Horse'},{emoji:'🎩',word:'Hat'}],
+  I:[{emoji:'🍦',word:'Ice cream'},{emoji:'🏝️',word:'Island'},{emoji:'🦎',word:'Iguana'}],
+  J:[{emoji:'🍭',word:'Jellybean'},{emoji:'🦒',word:'Jaguar'},{emoji:'🎃',word:'Jack o lantern'}],
+  K:[{emoji:'🦘',word:'Kangaroo'},{emoji:'🪁',word:'Kite'},{emoji:'🔑',word:'Key'}],
+  L:[{emoji:'🦁',word:'Lion'},{emoji:'🍋',word:'Lemon'},{emoji:'🦎',word:'Lizard'}],
+  M:[{emoji:'🐒',word:'Monkey'},{emoji:'🌙',word:'Moon'},{emoji:'🎵',word:'Music'}],
+  N:[{emoji:'🪺',word:'Nest'},{emoji:'🎵',word:'Notes'},{emoji:'🌙',word:'Night'}],
+  O:[{emoji:'🐙',word:'Octopus'},{emoji:'🍊',word:'Orange'},{emoji:'🦉',word:'Owl'}],
+  P:[{emoji:'🐧',word:'Penguin'},{emoji:'🍕',word:'Pizza'},{emoji:'🌸',word:'Pink flower'}],
+  Q:[{emoji:'👸',word:'Queen'},{emoji:'❓',word:'Question'},{emoji:'🦆',word:'Quack duck'}],
+  R:[{emoji:'🐇',word:'Rabbit'},{emoji:'🌈',word:'Rainbow'},{emoji:'🚀',word:'Rocket'}],
+  S:[{emoji:'⭐',word:'Star'},{emoji:'🐍',word:'Snake'},{emoji:'🌞',word:'Sun'}],
+  T:[{emoji:'🐯',word:'Tiger'},{emoji:'🌳',word:'Tree'},{emoji:'🚂',word:'Train'}],
+  U:[{emoji:'☂️',word:'Umbrella'},{emoji:'🦄',word:'Unicorn'},{emoji:'⬆️',word:'Up arrow'}],
+  V:[{emoji:'🎻',word:'Violin'},{emoji:'🌋',word:'Volcano'},{emoji:'🦅',word:'Vulture'}],
+  W:[{emoji:'🐋',word:'Whale'},{emoji:'🌊',word:'Wave'},{emoji:'🐺',word:'Wolf'}],
+  X:[{emoji:'🎸',word:'Xylophone'},{emoji:'❌',word:'X mark'},{emoji:'📦',word:'Xbox'}],
+  Y:[{emoji:'🧶',word:'Yarn'},{emoji:'🤸',word:'Yoga'},{emoji:'🌻',word:'Yellow flower'}],
+  Z:[{emoji:'🦓',word:'Zebra'},{emoji:'⚡',word:'Zap'},{emoji:'🤐',word:'Zipper'}]
+};
+const allLetters=Object.keys(letterData);
+let letterAnswer='';
+
+function newLetterQ(){
+  if(ctx.state==='suspended')ctx.resume();
+  playNext();
+  answered.letters=false;
+  document.getElementById('letters-feedback').textContent='';
+  const correctLetter=pick(allLetters);
+  const correctWord=pick(letterData[correctLetter]);
+  letterAnswer=correctWord.word;
+  const colors=['#F59E0B','#EF4444','#3B82F6','#10B981','#8B5CF6','#EC4899'];
+  document.getElementById('letter-display').innerHTML=`<span style="color:${pick(colors)}">${correctLetter}</span>`;
+  const wrongLetters=shuffle(allLetters.filter(l=>l!==correctLetter)).slice(0,3);
+  const options=shuffle([
+    correctWord,
+    ...wrongLetters.map(l=>pick(letterData[l]))
+  ]);
+  const cont=document.getElementById('letter-options');
+  cont.innerHTML='';
+  options.forEach(o=>{
+    const b=document.createElement('button');
+    b.className='letter-btn';
+    b.innerHTML=`<span class="letter-emoji">${o.emoji}</span>${o.word}`;
+    b.onclick=()=>checkLetter(o.word,b);
+    cont.appendChild(b);
+  });
+}
+
+function checkLetter(chosen,el){
+  if(answered.letters)return;
+  if(ctx.state==='suspended')ctx.resume();
+  answered.letters=true;
+  document.querySelectorAll('.letter-btn').forEach(b=>{
+    b.style.pointerEvents='none';
+    const w=b.textContent.trim().replace(/^[^\w]*/,'');
+    if(b.textContent.includes(letterAnswer)) b.className='letter-btn correct';
+    else if(b===el) b.className='letter-btn wrong';
+  });
+  const ok=chosen===letterAnswer;
+  if(ok)addScore('letters');
+  setFeedback('letters',ok);
+}
+
+// ============ ANIMALS ============
+const animalData=[
+  {emoji:'🐶',name:'Dog',sound:'Woof!'},{emoji:'🐱',name:'Cat',sound:'Meow!'},
+  {emoji:'🐮',name:'Cow',sound:'Moo!'},{emoji:'🐷',name:'Pig',sound:'Oink!'},
+  {emoji:'🐸',name:'Frog',sound:'Ribbit!'},{emoji:'🐘',name:'Elephant',sound:'Trumpet!'},
+  {emoji:'🦁',name:'Lion',sound:'Roar!'},{emoji:'🐯',name:'Tiger',sound:'Growl!'},
+  {emoji:'🐻',name:'Bear',sound:'Growl!'},{emoji:'🦊',name:'Fox',sound:'Yip!'},
+  {emoji:'🐨',name:'Koala',sound:'Growl!'},{emoji:'🐼',name:'Panda',sound:'Squeak!'},
+  {emoji:'🦋',name:'Butterfly',sound:'Flutter!'},{emoji:'🐢',name:'Turtle',sound:'Hiss!'},
+  {emoji:'🦆',name:'Duck',sound:'Quack!'},{emoji:'🐔',name:'Chicken',sound:'Cluck!'},
+  {emoji:'🐑',name:'Sheep',sound:'Baa!'},{emoji:'🐺',name:'Wolf',sound:'Howl!'},
+  {emoji:'🦓',name:'Zebra',sound:'Neigh!'},{emoji:'🦒',name:'Giraffe',sound:'Hum!'}
+];
+let animalAnswer='';
+
+function newAnimalQ(){
+  if(ctx.state==='suspended')ctx.resume();
+  playNext();
+  answered.animals=false;
+  document.getElementById('animals-feedback').textContent='';
+  const shuffled=shuffle(animalData).slice(0,4);
+  const correct=pick(shuffled);
+  animalAnswer=correct.name;
+  document.getElementById('animal-display').textContent=correct.emoji;
+  const cont=document.getElementById('animal-options');
+  cont.innerHTML='';
+  shuffled.forEach(a=>{
+    const b=document.createElement('button');
+    b.className='animal-btn';
+    b.innerHTML=`<span class="a-emoji">${a.emoji}</span>${a.name} — ${a.sound}`;
+    b.onclick=()=>checkAnimal(a.name,b);
+    cont.appendChild(b);
+  });
+}
+
+function checkAnimal(chosen,el){
+  if(answered.animals)return;
+  if(ctx.state==='suspended')ctx.resume();
+  answered.animals=true;
+  document.querySelectorAll('.animal-btn').forEach(b=>{
+    b.style.pointerEvents='none';
+    if(b.textContent.includes(animalAnswer)&&b.textContent.includes('—')) b.className='animal-btn correct';
+    else if(b===el) b.className='animal-btn wrong';
+  });
+  const ok=chosen===animalAnswer;
+  if(ok)addScore('animals');
+  setFeedback('animals',ok);
+}
+
+// ============ PATTERNS ============
+const patternSets=[
+  ['🍎','🍌'],['🐶','🐱'],['⭐','🌙'],['🔴','🔵'],['🌸','🌻'],
+  ['🚗','🚂'],['🐸','🦋'],['❤️','💛'],['🎈','🎉'],['🍕','🍔']
+];
+let patternAnswer='';
+
+function newPatternQ(){
+  if(ctx.state==='suspended')ctx.resume();
+  playNext();
+  answered.patterns=false;
+  document.getElementById('patterns-feedback').textContent='';
+  const set=pick(patternSets);
+  const [a,b]=set;
+  const patterns=[[a,b,a,b,a],[a,a,b,a,a],[a,b,b,a,b],[a,b,a,a,b]];
+  const chosen=pick(patterns);
+  patternAnswer=chosen[4];
+  const visible=chosen.slice(0,4);
+  const row=document.getElementById('pattern-row');
+  row.innerHTML=visible.map(e=>`<span class="pattern-item">${e}</span>`).join('')+'<span class="pattern-blank">?</span>';
+  const opts=shuffle([...new Set([a,b])]);
+  const optsCont=document.getElementById('pattern-options');
+  optsCont.innerHTML='';
+  opts.forEach(o=>{
+    const btn=document.createElement('button');
+    btn.className='pattern-opt';
+    btn.textContent=o;
+    btn.onclick=()=>checkPattern(o,btn);
+    optsCont.appendChild(btn);
+  });
+}
+
+function checkPattern(chosen,el){
+  if(answered.patterns)return;
+  if(ctx.state==='suspended')ctx.resume();
+  answered.patterns=true;
+  document.querySelectorAll('.pattern-opt').forEach(b=>{
+    b.style.pointerEvents='none';
+    if(b.textContent===patternAnswer) b.className='pattern-opt correct';
+    else if(b===el) b.className='pattern-opt wrong';
+  });
+  const ok=chosen===patternAnswer;
+  if(ok)addScore('patterns');
+  setFeedback('patterns',ok);
+}
+
+// ============ COMPARE ============
+const compareTypes=['bigger','smaller','more'];
+let compareAnswer='';
+
+function newCompareQ(){
+  if(ctx.state==='suspended')ctx.resume();
+  playNext();
+  answered.compare=false;
+  document.getElementById('compare-feedback').textContent='';
+  const type=pick(compareTypes);
+  let n1=rand(1,9), n2=rand(1,9);
+  while(n1===n2){n2=rand(1,9);}
+  const em=pick(['🍎','⭐','🐶','🌸','🎈','🍕','🦋','🏆']);
+  compareAnswer=type==='bigger'||type==='more'?(n1>n2?'left':'right'):(n1<n2?'left':'right');
+  const q=type==='bigger'?'Click the BIGGER number!':type==='smaller'?'Click the SMALLER number!':'Click the group with MORE!';
+  document.getElementById('compare-question').textContent=q;
+  const row=document.getElementById('compare-row');
+  row.innerHTML='';
+  [n1,n2].forEach((n,i)=>{
+    const d=document.createElement('div');
+    d.className='compare-box';
+    d.innerHTML=`<div class="num">${n}</div><div class="emojis">${Array(Math.min(n,5)).fill(em).join('')}</div>`;
+    d.onclick=()=>checkCompare(i===0?'left':'right',d);
+    row.appendChild(d);
+    if(i===0){const s=document.createElement('div');s.style.fontSize='24px';s.textContent='vs';row.appendChild(s);}
+  });
+}
+
+function checkCompare(chosen,el){
+  if(answered.compare)return;
+  if(ctx.state==='suspended')ctx.resume();
+  answered.compare=true;
+  const boxes=document.querySelectorAll('.compare-box');
+  boxes.forEach(b=>b.style.pointerEvents='none');
+  const correctBox=compareAnswer==='left'?boxes[0]:boxes[1];
+  correctBox.className='compare-box correct';
+  if(el!==correctBox) el.className='compare-box wrong';
+  const ok=chosen===compareAnswer;
+  if(ok)addScore('compare');
+  setFeedback('compare',ok);
+}
+
+// INIT
+newColorQ();
+</script>
+</body>
+</html>
