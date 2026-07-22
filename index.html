@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Math Stars 🌟 - Learn Math!</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; padding: 20px; }
+  .app { background: white; border-radius: 24px; padding: 20px; max-width: 420px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+  .header { text-align: center; padding: 16px; background: linear-gradient(135deg, #7C3AED, #4F46E5); border-radius: 16px; margin-bottom: 16px; color: white; }
+  .header .icon { font-size: 40px; margin-bottom: 6px; }
+  .header h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .header p { font-size: 13px; opacity: 0.85; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+  .tab { flex: 1; padding: 10px 4px; border-radius: 12px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .tab.active { color: white; transform: scale(1.03); }
+  .tab:nth-child(1).active { background: #F59E0B; }
+  .tab:nth-child(2).active { background: #10B981; }
+  .tab:nth-child(3).active { background: #EF4444; }
+  .tab:not(.active) { background: #F3F4F6; color: #6B7280; }
+  .tab:not(.active):hover { background: #E5E7EB; }
+  .card { background: #FAFAFA; border: 1px solid #E5E7EB; border-radius: 16px; padding: 16px; margin-bottom: 12px; }
+  .emoji-row { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; min-height: 50px; align-items: center; margin: 10px 0; }
+  .emoji { font-size: 28px; transition: transform 0.2s; user-select: none; }
+  .question { font-size: 28px; font-weight: 700; color: #1F2937; text-align: center; margin: 12px 0; }
+  .answer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+  .ans-btn { padding: 16px; border-radius: 14px; border: 2px solid #E5E7EB; background: white; font-size: 24px; font-weight: 700; cursor: pointer; transition: all 0.15s; color: #1F2937; }
+  .ans-btn:hover { border-color: #7C3AED; background: #EDE9FE; transform: scale(1.05); }
+  .ans-btn.correct { background: #D1FAE5; border-color: #10B981; color: #065F46; }
+  .ans-btn.wrong { background: #FEE2E2; border-color: #EF4444; color: #991B1B; }
+  .score-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .score { font-size: 14px; color: #6B7280; font-weight: 500; }
+  .stars { font-size: 18px; }
+  .feedback { text-align: center; font-size: 18px; font-weight: 700; min-height: 28px; margin: 8px 0; }
+  .feedback.good { color: #10B981; }
+  .feedback.bad { color: #EF4444; }
+  .next-btn { width: 100%; padding: 14px; border-radius: 14px; border: none; background: linear-gradient(135deg, #7C3AED, #4F46E5); color: white; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 10px; transition: all 0.2s; }
+  .next-btn:hover { transform: scale(1.02); opacity: 0.95; }
+  .count-btn { width: 60px; height: 60px; border-radius: 50%; border: 3px solid #E5E7EB; background: white; font-size: 28px; cursor: pointer; font-weight: 700; color: #1F2937; transition: all 0.2s; }
+  .count-btn:hover { background: #EDE9FE; border-color: #7C3AED; transform: scale(1.1); }
+  .count-display { font-size: 52px; font-weight: 700; color: #7C3AED; text-align: center; margin: 10px 0; min-width: 80px; }
+  .count-row { display: flex; align-items: center; justify-content: center; gap: 24px; }
+  .progress { height: 10px; background: #E5E7EB; border-radius: 5px; overflow: hidden; margin-bottom: 12px; }
+  .progress-bar { height: 100%; background: linear-gradient(90deg, #7C3AED, #4F46E5); border-radius: 5px; transition: width 0.4s; }
+  .section-title { font-size: 14px; font-weight: 600; color: #6B7280; margin-bottom: 8px; }
+  .add-sides { display: flex; gap: 8px; justify-content: center; align-items: center; margin: 8px 0; }
+  .add-side { flex: 1; background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 8px; min-height: 60px; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; justify-content: center; }
+  .plus-sign { font-size: 28px; color: #10B981; font-weight: 700; }
+  .sub-emoji-row { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; min-height: 50px; align-items: center; margin: 10px 0; }
+  .celebration { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; }
+  .confetti { position: absolute; width: 10px; height: 10px; border-radius: 2px; animation: fall 1s ease-in forwards; }
+  @keyframes fall { to { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  footer { text-align: center; font-size: 12px; color: #9CA3AF; margin-top: 8px; padding-top: 8px; border-top: 1px solid #E5E7EB; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="icon">🌟</div>
+    <h1>Math Stars!</h1>
+    <p>For PreK, Kinder &amp; 1st Grade</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('count')">🔢 Count</button>
+    <button class="tab" onclick="showTab('add')">➕ Add</button>
+    <button class="tab" onclick="showTab('sub')">➖ Take Away</button>
+  </div>
+
+  <!-- COUNTING TAB -->
+  <div id="count-tab" class="tab-content active">
+    <div class="card">
+      <div class="score-row">
+        <span class="score">⭐ Stars: <span id="count-score">0</span></span>
+        <span class="stars" id="count-stars"></span>
+      </div>
+      <div class="progress"><div class="progress-bar" id="count-bar" style="width:0%"></div></div>
+      <div class="section-title">How many do you see? 👀</div>
+      <div class="emoji-row" id="count-emojis"></div>
+      <div class="answer-grid" id="count-answers"></div>
+      <div class="feedback" id="count-feedback"></div>
+      <button class="next-btn" onclick="newCountQ()">Next Question ➡️</button>
+    </div>
+    <div class="card">
+      <div class="section-title">Practice counting! Touch + or −</div>
+      <div class="count-row">
+        <button class="count-btn" onclick="countDown()">−</button>
+        <div class="count-display" id="counter-num">5</div>
+        <button class="count-btn" onclick="countUp()">+</button>
+      </div>
+      <div class="emoji-row" id="counter-emojis"></div>
+    </div>
+  </div>
+
+  <!-- ADDITION TAB -->
+  <div id="add-tab" class="tab-content">
+    <div class="card">
+      <div class="score-row">
+        <span class="score">⭐ Stars: <span id="add-score">0</span></span>
+        <span class="stars" id="add-stars"></span>
+      </div>
+      <div class="progress"><div class="progress-bar" id="add-bar" style="width:0%"></div></div>
+      <div class="section-title">Add them together! 🧮</div>
+      <div class="add-sides">
+        <div class="add-side" id="add-side1"></div>
+        <div class="plus-sign">+</div>
+        <div class="add-side" id="add-side2"></div>
+      </div>
+      <div class="question" id="add-question"></div>
+      <div class="answer-grid" id="add-answers"></div>
+      <div class="feedback" id="add-feedback"></div>
+      <button class="next-btn" onclick="newAddQ()">Next Question ➡️</button>
+    </div>
+  </div>
+
+  <!-- SUBTRACTION TAB -->
+  <div id="sub-tab" class="tab-content">
+    <div class="card">
+      <div class="score-row">
+        <span class="score">⭐ Stars: <span id="sub-score">0</span></span>
+        <span class="stars" id="sub-stars"></span>
+      </div>
+      <div class="progress"><div class="progress-bar" id="sub-bar" style="width:0%"></div></div>
+      <div class="section-title">How many are left? 🤔</div>
+      <div class="sub-emoji-row" id="sub-emojis"></div>
+      <div class="question" id="sub-question"></div>
+      <div class="answer-grid" id="sub-answers"></div>
+      <div class="feedback" id="sub-feedback"></div>
+      <button class="next-btn" onclick="newSubQ()">Next Question ➡️</button>
+    </div>
+  </div>
+
+  <footer>Made with ❤️ for little learners · Math Stars</footer>
+</div>
+
+<script>
+const emojis = ['🍎','🐶','🌟','🦋','🐸','🍊','🐱','🌸','🐼','🍇','🦄','🐥','🍓','🐙','🌈','🎈','🍕','🚀','🎵','🏆'];
+const praise = ['Amazing! 🎉','Super job! 🌟','You got it! 🏆','Awesome! 🎊','Brilliant! ✨','Wow! 🌈','Perfect! 💫','Great work! 🦄','You rock! 🎸','Fantastic! 🚀'];
+const encourage = ['Try again! 💪','Almost there! 🤔','You can do it! 🌟','Keep going! 💛','So close! 🎯'];
+
+let scores = {count:0, add:0, sub:0};
+let correct = {count:null, add:null, sub:null};
+let answered = {count:false, add:false, sub:false};
+let counterVal = 5;
+let counterEmoji = '🌟';
+
+function rand(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function shuffle(arr){let a=[...arr];for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function showTab(tab){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(tab+'-tab').classList.add('active');
+  document.querySelectorAll('.tab')[['count','add','sub'].indexOf(tab)].classList.add('active');
+  if(tab==='count' && correct.count===null) newCountQ();
+  if(tab==='add' && correct.add===null) newAddQ();
+  if(tab==='sub' && correct.sub===null) newSubQ();
+}
+
+function makeAnswerBtns(options, correctAns, prefix){
+  const grid = document.getElementById(prefix+'-answers');
+  grid.innerHTML='';
+  shuffle(options).forEach(a=>{
+    const btn = document.createElement('button');
+    btn.className='ans-btn';
+    btn.textContent=a;
+    btn.onclick=()=>checkAnswer(a, correctAns, prefix);
+    grid.appendChild(btn);
+  });
+}
+
+function getOptions(ans, max){
+  let opts = new Set([ans]);
+  while(opts.size < 4){
+    let v = ans + rand(-3,3);
+    if(v>=0 && v<=max && v!==ans) opts.add(v);
+  }
+  return [...opts];
+}
+
+function checkAnswer(chosen, correctAns, prefix){
+  if(answered[prefix]) return;
+  answered[prefix] = true;
+  const btns = document.querySelectorAll('#'+prefix+'-answers .ans-btn');
+  btns.forEach(b=>{
+    if(+b.textContent===correctAns) b.className='ans-btn correct';
+    else if(+b.textContent===chosen) b.className='ans-btn wrong';
+    b.style.pointerEvents='none';
+  });
+  const fb = document.getElementById(prefix+'-feedback');
+  if(+chosen===correctAns){
+    scores[prefix]++;
+    document.getElementById(prefix+'-score').textContent=scores[prefix];
+    document.getElementById(prefix+'-bar').style.width=Math.min(scores[prefix]*10,100)+'%';
+    document.getElementById(prefix+'-stars').textContent='⭐'.repeat(Math.min(scores[prefix],5));
+    fb.textContent=pick(praise);
+    fb.className='feedback good';
+    celebrate();
+  } else {
+    fb.textContent=pick(encourage);
+    fb.className='feedback bad';
+  }
+}
+
+function celebrate(){
+  const colors=['#FF6B6B','#4ECDC4','#45B7D1','#96CEB4','#FFEAA7','#DDA0DD','#98D8C8'];
+  for(let i=0;i<20;i++){
+    setTimeout(()=>{
+      const c=document.createElement('div');
+      c.className='confetti';
+      c.style.cssText=`left:${Math.random()*100}%;top:-20px;background:${pick(colors)};transform:rotate(${rand(0,360)}deg);animation-duration:${0.8+Math.random()*0.6}s;animation-delay:${Math.random()*0.3}s;`;
+      document.body.appendChild(c);
+      setTimeout(()=>c.remove(),1500);
+    },i*30);
+  }
+}
+
+function newCountQ(){
+  answered.count=false;
+  document.getElementById('count-feedback').textContent='';
+  const n=rand(1,10);
+  const em=pick(emojis);
+  correct.count=n;
+  document.getElementById('count-emojis').innerHTML=Array(n).fill('<span class="emoji">'+em+'</span>').join('');
+  makeAnswerBtns(getOptions(n,10), n, 'count');
+}
+
+function newAddQ(){
+  answered.add=false;
+  document.getElementById('add-feedback').textContent='';
+  const a=rand(0,5), b=rand(0,5);
+  correct.add=a+b;
+  const em1=pick(emojis), em2=pick(emojis);
+  document.getElementById('add-side1').innerHTML=a===0?'<span style="font-size:20px;color:#9CA3AF">0️⃣</span>':Array(a).fill('<span style="font-size:22px">'+em1+'</span>').join('');
+  document.getElementById('add-side2').innerHTML=b===0?'<span style="font-size:20px;color:#9CA3AF">0️⃣</span>':Array(b).fill('<span style="font-size:22px">'+em2+'</span>').join('');
+  document.getElementById('add-question').textContent=a+' + '+b+' = ?';
+  makeAnswerBtns(getOptions(a+b,10), a+b, 'add');
+}
+
+function newSubQ(){
+  answered.sub=false;
+  document.getElementById('sub-feedback').textContent='';
+  const a=rand(1,10), b=rand(0,a);
+  correct.sub=a-b;
+  const em=pick(emojis);
+  document.getElementById('sub-emojis').innerHTML=Array(a).fill(0).map((_,i)=>'<span class="emoji" style="'+(i<b?'opacity:0.2;filter:grayscale(1);':'')+'">'+em+'</span>').join('');
+  document.getElementById('sub-question').textContent=a+' − '+b+' = ?';
+  makeAnswerBtns(getOptions(a-b,10), a-b, 'sub');
+}
+
+function countUp(){if(counterVal<20)counterVal++;updateCounter();}
+function countDown(){if(counterVal>0)counterVal--;updateCounter();}
+function updateCounter(){
+  counterEmoji=pick(emojis);
+  document.getElementById('counter-num').textContent=counterVal;
+  document.getElementById('counter-emojis').innerHTML=counterVal===0?'<span style="font-size:16px;color:#9CA3AF">Zero! Nothing here 😊</span>':Array(Math.min(counterVal,20)).fill('<span class="emoji" style="font-size:22px">'+counterEmoji+'</span>').join('');
+}
+
+newCountQ();
+updateCounter();
+</script>
+</body>
+</html>
